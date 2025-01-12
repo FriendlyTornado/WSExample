@@ -7,7 +7,7 @@ import (
 
 func handlerFunc(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprint(w, "<B>Example page</B><br><p><a href=\"/contact\">Contact</a>")
+	fmt.Fprint(w, "<B>Example page</B><br><p><a href=\"contact\">Contact</a>")
 }
 
 func contactFunc(w http.ResponseWriter, r *http.Request) {
