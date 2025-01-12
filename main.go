@@ -2,32 +2,69 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
+	"path/filepath"
 )
 
-func handlerFunc(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprint(w, "<B>Example page</B><br><p><a href=\"contact\">Contact</a>")
+type PageInfo struct {
+	Name  string
+	Email string
+	Title string
 }
 
-func contactFunc(w http.ResponseWriter, r *http.Request) {
+func mainHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprint(w, "<B>Contact</B><p>You can contact me at "+
-		"<a href=\"mailto:ctrl.vee@gmail.com\">ctrl.vee@gmail.com</a>.")
+	info := PageInfo{
+		Name:  "Jen",
+		Title: "Main Page",
+	}
+	tplPath := filepath.Join("templates", "home.gohtml")
+	t, err := template.ParseFiles(tplPath)
+	if err != nil {
+		http.Error(w, "Error parsing page", 500)
+	}
+
+	err = t.Execute(w, info)
+	if err != nil {
+		http.Error(w, "Error getting page", 500)
+	}
+}
+
+func contactHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	info := PageInfo{
+		Name:  "Jen",
+		Email: "ctrl.vee@gmail.com",
+		Title: "Contact",
+	}
+
+	tplPath := filepath.Join("templates", "contact.gohtml")
+	t, err := template.ParseFiles(tplPath)
+	if err != nil {
+		http.Error(w, "Error parsing page", 500)
+	}
+
+	err = t.Execute(w, info)
+	if err != nil {
+		http.Error(w, "Error getting page", 500)
+	}
+
 }
 
 func pathHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case "/":
-		handlerFunc(w, r)
+		mainHandler(w, r)
 	case "/contact":
-		contactFunc(w, r)
+		contactHandler(w, r)
 	default:
-		http.NotFound(w, r)
+		http.Error(w, "Page not found", 400)
 	}
 }
 
 func main() {
+
 	http.HandleFunc("/", pathHandler)
 	fmt.Println("Starting server on port 3000")
 	http.ListenAndServe(":3000", nil)
